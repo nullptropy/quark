@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>quark</title>
+        <style>
+            body {
+                background-color: #404a5b;
+                margin: 0;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            #canvas {
+                border: 1px solid black;
+                box-shadow: 0px 0px 10px black;
+            }
+        </style>
+    </head>
+    <body>
+        <script type="module">
+            import init, {
+                AppState
+            } from './quark.js';
+
+            const setupEventListeners = (canvas, appState) => {
+                const rect = canvas.getBoundingClientRect();
+
+                const handleMouseMove = ({
+                    clientX,
+                    clientY
+                }) => {
+                    appState.on_mousemove(clientX - rect.left, clientY - rect.top);
+                };
+
+                const handleMouseDown = ({
+                    button
+                }) => appState.on_mousedown(button);
+                const handleMouseUp = ({
+                    button
+                }) => appState.on_mouseup(button);
+
+                canvas.addEventListener("mousedown", handleMouseDown);
+                canvas.addEventListener("mouseup", handleMouseUp);
+                canvas.addEventListener("mousemove", handleMouseMove);
+            };
+
+            const requestAnimationFrameLoop = (canvas, appState) => {
+                const onFrame = () => {
+                    requestAnimationFrame(onFrame);
+                    appState.tick(canvas.getContext("2d"));
+                };
+                requestAnimationFrame(onFrame);
+            };
+
+            const run = async () => {
+                await init();
+                const canvas = document.getElementById("canvas");
+
+                const appState = AppState.new(canvas.width, canvas.height);
+                setupEventListeners(canvas, appState);
+                requestAnimationFrameLoop(canvas, appState);
+            };
+
+            run();
+        </script>
+    </body>
+</html>
